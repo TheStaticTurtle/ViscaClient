@@ -1,0 +1,13 @@
+{
+  "name": "ViscaClient",
+  "version": "1.0",
+  "keywords": "sony, visca, ptz",
+  "description": "Act as a receiver for the Sony Visca protocol",
+  "repository":
+  {
+    "type": "git",
+    "url": "https://github.com/TheStaticTurtle/Arduino-ViscaClient.git"
+  },
+  "frameworks": "arduino",
+  "platforms": "atmelavr",
+}
