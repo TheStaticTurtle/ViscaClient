@@ -502,24 +502,44 @@ void Visca::parse_command() {
 	//CAM_PowerInq
 	else if(check_address_byte(rx_buffer[0]) && strncmp(rx_buffer+1,"\x09\x04\x00\xff",4) == 0) {
 		this->debug.println("CAM_PowerInq");
-		this->send_address();
 
+		this->send_address();
 		if(this->status_powered)
 			this->stream.write("\x50\x02\xFF");
 		else
 			this->stream.write("\x50\x03\xFF");
 	}
-	//TODO: CAM_ZoomPosInq
+	//CAM_ZoomPosInq
+	else if(check_address_byte(rx_buffer[0]) && strncmp(rx_buffer+1,"\x09\x04\x47\xff",4) == 0) {
+		this->debug.println("CAM_ZoomPosInq");
 
-	//TODO: CAM_FocusModeInq
-
-	//TODO: CAM_FocusPosInq
-	else if(check_address_byte(rx_buffer[0]) && strncmp(rx_buffer+1,"\x09\x04\x38\xff",4) == 0) {
-		this->debug.println("CAM_FocusPosInq");
 		this->send_address();
+		this->stream.write("\x50");
+		this->stream.write((this->status_zoom_position&0xf000)>>12);
+		this->stream.write((this->status_zoom_position&0xf00)>>8);
+		this->stream.write((this->status_zoom_position&0xf0)>>4);
+		this->stream.write((this->status_zoom_position&0xf)>>0);
+		this->stream.write("\xFF");
+	}
+	//CAM_FocusModeInq
+	else if(check_address_byte(rx_buffer[0]) && strncmp(rx_buffer+1,"\x09\x04\x38\xff",4) == 0) {
+		this->debug.println("CAM_FocusModeInq");
 
+		this->send_address();
 		this->stream.write("\x50");
 		this->stream.write(this->status_focus_mode);
+		this->stream.write("\xFF");
+	}
+	//CAM_FocusPosInq
+	else if(check_address_byte(rx_buffer[0]) && strncmp(rx_buffer+1,"\x09\x04\x48\xff",4) == 0) {
+		this->debug.println("CAM_FocusPosInq");
+
+		this->send_address();
+		this->stream.write("\x50");
+		this->stream.write((this->status_focus_position&0xf000)>>12);
+		this->stream.write((this->status_focus_position&0xf00)>>8);
+		this->stream.write((this->status_focus_position&0xf0)>>4);
+		this->stream.write((this->status_focus_position&0xf)>>0);
 		this->stream.write("\xFF");
 	}
 	//CAM_WBModeInq
@@ -531,11 +551,26 @@ void Visca::parse_command() {
 		this->stream.write(this->status_white_balance_mode);
 		this->stream.write("\xFF");
 	}
+	//CAM_RGainInq
+	else if(check_address_byte(rx_buffer[0]) && strncmp(rx_buffer+1,"\x09\x04\x43\xff",4) == 0) {
+		this->debug.println("CAM_RGainInq");
 
-	//TODO: CAM_RGainInq
+		this->send_address();
+		this->stream.write("\x50\x00\x00",3);
+		this->stream.write((this->status_wg_r_gain&0xf0)>>4);
+		this->stream.write((this->status_wg_r_gain&0xf)>>0);
+		this->stream.write("\xFF");
+	}
+	//CAM_BGainInq
+	else if(check_address_byte(rx_buffer[0]) && strncmp(rx_buffer+1,"\x09\x04\x44\xff",4) == 0) {
+		this->debug.println("CAM_BGainInq");
 
-	//TODO: CAM_BGainInq
-
+		this->send_address();
+		this->stream.write("\x50\x00\x00",3);
+		this->stream.write((this->status_wg_b_gain&0xf0)>>4);
+		this->stream.write((this->status_wg_b_gain&0xf)>>0);
+		this->stream.write("\xFF");
+	}
 	//CAM_AEModeInq
 	else if(check_address_byte(rx_buffer[0]) && strncmp(rx_buffer+1,"\x09\x04\x39\xff",4) == 0) {
 		this->debug.println("CAM_AEModeInq");
@@ -545,96 +580,139 @@ void Visca::parse_command() {
 		this->stream.write(this->status_autoexposure);
 		this->stream.write("\xFF");
 	}
-	//TODO: CAM_BGainInq
-
 	//TODO: CAM_ShutterPosInq
+	else if(check_address_byte(rx_buffer[0]) && strncmp(rx_buffer+1,"\x09\x04\x44\xff",4) == 0) {
+		this->debug.println("CAM_ShutterPosInq");
 
-	//CAM_IrisPosInq
+		this->send_address();
+		this->stream.write("\x50\x00\x00",3);
+		this->stream.write((this->status_shutter&0xf0)>>4);
+		this->stream.write((this->status_shutter&0xf)>>0);
+		this->stream.write("\xFF");
+	}
+	//TODO CAM_IrisPosInq
 	else if(check_address_byte(rx_buffer[0]) && strncmp(rx_buffer+1,"\x09\x04\x4b\xff",4) == 0) {
 		this->debug.println("CAM_IrisPosInq");
-		send_syntax_err();
-		/*
+
 		this->send_address();
-
-		this->stream.write("\x50");
-		this->stream.write("\x00");
-		this->stream.write("\x00");
-
-		//TODO: Implement proper values
-		this->stream.write("\x00");
-		this->stream.write("\x01");
-
-		this->stream.write("\xFF");*/
+		this->stream.write("\x50\x00\x00",3);
+		this->stream.write((this->status_iris&0xf0)>>4);
+		this->stream.write((this->status_iris&0xf)>>0);
+		this->stream.write("\xFF");
 	}
 
-	//CAM_GainPosiInq
+	//TODO: CAM_GainPosiInq
 	else if(check_address_byte(rx_buffer[0]) && strncmp(rx_buffer+1,"\x09\x04\x4c\xff",4) == 0) {
 		this->debug.println("CAM_GainPosiInq");
-		send_syntax_err();
-		/*
+
 		this->send_address();
-
-		this->stream.write("\x50");
-		this->stream.write("\x00");
-		this->stream.write("\x00");
-
-		//TODO: Implement proper values
-		this->stream.write("\x00");
-		this->stream.write("\x0A");
-
-		this->stream.write("\xFF");*/
+		this->stream.write("\x50\x00\x00",3);
+		this->stream.write((this->status_gain&0xf0)>>4);
+		this->stream.write((this->status_gain&0xf)>>0);
+		this->stream.write("\xFF");
 	}
-	//CAM_BrightPosiInq
+	//TODO: CAM_BrightPosiInq
 	else if(check_address_byte(rx_buffer[0]) && strncmp(rx_buffer+1,"\x09\x04\x4d\xff",4) == 0) {
 		this->debug.println("CAM_BrightPosiInq");
-		send_syntax_err();
-		/*
+
 		this->send_address();
+		this->stream.write("\x50\x00\x00",3);
+		this->stream.write((this->status_brightness&0xf0)>>4);
+		this->stream.write((this->status_brightness&0xf)>>0);
+		this->stream.write("\xFF");
+	}
+	//CAM_ExpCompModeInq
+	else if(check_address_byte(rx_buffer[0]) && strncmp(rx_buffer+1,"\x09\x04\x3e\xff",4) == 0) {
+		this->debug.println("CAM_ExpCompModeInq");
 
+		this->send_address();
 		this->stream.write("\x50");
-		this->stream.write("\x00");
-		this->stream.write("\x00");
+		this->stream.write(this->status_exp_comp_en?"\x02":"\x03");
+		this->stream.write("\xFF");
+	}
+	//TODO: CAM_ExpCompPosInq
+	else if(check_address_byte(rx_buffer[0]) && strncmp(rx_buffer+1,"\x09\x04\x4e\xff",4) == 0) {
+		this->debug.println("CAM_ExpCompPosInq");
 
-		//TODO: Implement proper values
-		this->stream.write("\x01");
-		this->stream.write("\x08");
+		this->send_address();
+		this->stream.write("\x50\x00\x00",3);
+		this->stream.write((this->status_exp_comp&0xf0)>>4);
+		this->stream.write((this->status_exp_comp&0xf)>>0);
+		this->stream.write("\xFF");
+	}
+	//TODO: CAM_ApertureInq
+	else if(check_address_byte(rx_buffer[0]) && strncmp(rx_buffer+1,"\x09\x04\x42\xff",4) == 0) {
+		this->debug.println("CAM_ApertureInq");
 
-		this->stream.write("\xFF");*/
+		this->send_address();
+		this->stream.write("\x50\x00\x00",3);
+		this->stream.write((this->status_aperture&0xf0)>>4);
+		this->stream.write((this->status_aperture&0xf)>>0);
+		this->stream.write("\xFF");
+	}
+	//TODO: CAM_MemoryInq
+	else if(check_address_byte(rx_buffer[0]) && strncmp(rx_buffer+1,"\x09\x04\x3f\xff",4) == 0) {
+		this->debug.println("UNIMPLEMENTED CAM_MemoryInq");
+		this->send_syntax_err();
+	}
+	//TODO: SYS_MenuModeInq
+	else if(check_address_byte(rx_buffer[0]) && strncmp(rx_buffer+1,"\x09\x06\x06\xff",4) == 0) {
+		this->debug.println("UNIMPLEMENTED SYS_MenuModeInq");
+		this->send_syntax_err();
+	}
+	//CAM_LR_ReverseInq
+	else if(check_address_byte(rx_buffer[0]) && strncmp(rx_buffer+1,"\x09\x04\x61\xff",4) == 0) {
+		this->debug.println("CAM_LR_ReverseInq");
+
+		this->send_address();
+		this->stream.write("\x50");
+		this->stream.write(this->status_lr_reverse?"\x02":"\x03");
+		this->stream.write("\xFF");
+	}
+	//CAM_PictureFlipInq
+	else if(check_address_byte(rx_buffer[0]) && strncmp(rx_buffer+1,"\x09\x04\x66\xff",4) == 0) {
+		this->debug.println("CAM_PictureFlipInq");
+
+		this->send_address();
+		this->stream.write("\x50");
+		this->stream.write(this->status_ud_reverse?"\x02":"\x03");
+		this->stream.write("\xFF");
+	}
+	//TODO: CAM_IDInq
+	else if(check_address_byte(rx_buffer[0]) && strncmp(rx_buffer+1,"\x09\x04\x22\xff",4) == 0) {
+		this->debug.println("UNIMPLEMENTED CAM_IDInq");
+		this->send_syntax_err();
+	}
+	//TODO: CAM_VersionInq
+	else if(check_address_byte(rx_buffer[0]) && strncmp(rx_buffer+1,"\x09\x00\x02\xff",4) == 0) {
+		this->debug.println("UNIMPLEMENTED CAM_VersionInq");
+		this->send_syntax_err();
+	}
+	//TODO: VideoSystemInq
+	else if(check_address_byte(rx_buffer[0]) && strncmp(rx_buffer+1,"\x09\x02\x23\xff",4) == 0) {
+		this->debug.println("UNIMPLEMENTED VideoSystemInq");
+		this->send_syntax_err();
+	}
+	//TODO: IR_Transfer
+	else if(check_address_byte(rx_buffer[0]) && strncmp(rx_buffer+1,"\x09\x06\x1A\xff",4) == 0) {
+		this->debug.println("UNIMPLEMENTED IR_Transfer");
+		this->send_syntax_err();
+	}
+	//TODO: IR_Receive
+	else if(check_address_byte(rx_buffer[0]) && strncmp(rx_buffer+1,"\x09\x06\x08\xff",4) == 0) {
+		this->debug.println("UNIMPLEMENTED IR_Receive");
+		this->send_syntax_err();
 	}
 
-	//TODO: CAM_ExpCompModeInq
-
-	//TODO: CAM_ExpCompPosInq
-
-	//TODO: CAM_ApertureInq
-
-	//TODO: CAM_MemoryInq
-
-	//TODO: SYS_MenuModeInq
-
-	//TODO: CAM_LR_ReverseInq
-
-	//TODO: CAM_PictureFlipInq
-
-	//TODO: CAM_IDInq
-
-	//TODO: CAM_VersionInq
-
-	//TODO: VideoSystemInq
-
-	//TODO: IR_Transfer
-
-	//TODO: IR_Receive
-
-	//TODO: IR_ReceiveReturn
+	/*TODO: IR_ReceiveReturn
+	else if(check_address_byte(rx_buffer[0]) && strncmp(rx_buffer+1,"\x09\x04\x42\xff",4) == 0) {
+		this->debug.println("UNIMPLEMENTED IR_ReceiveReturn");
+		this->send_syntax_err();
+	}*/
 
 	//TODO: Pan-tiltMaxSpeedInq
 
 	//TODO: Pan-tiltPosInq
-
-	//TODO: CAM_VersionInq
-
-	//TODO: CAM_VersionInq
 
 	//CAM_BackLightInq
 	else if(check_address_byte(rx_buffer[0]) && strncmp(rx_buffer+1,"\x09\x04\x33\xff",4) == 0) {
